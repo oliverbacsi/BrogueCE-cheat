@@ -284,7 +284,7 @@ boolean attackWouldBeFutile(const creature *attacker, const creature *defender) 
 }
 
 /// @brief Determines if a creature is willing to attack another. Considers factors like discord,
-/// entrancement, confusion, and whether they are enemies. Terrain and location are not considered, 
+/// entrancement, confusion, and whether they are enemies. Terrain and location are not considered,
 /// except for krakens and eels that attack anything in deep water. Used for player and monster attacks.
 /// @param attacker the attacking creature
 /// @param defender the defending creature
@@ -1469,10 +1469,10 @@ boolean monsterAvoids(creature *monst, pos p) {
     return false;
 }
 
-/// @brief Attempts to utilize a monster's turn by either initiating movement or launching an attack. 
-/// Aims to shift the monster one space closer to the destination by evaluating the feasibility 
+/// @brief Attempts to utilize a monster's turn by either initiating movement or launching an attack.
+/// Aims to shift the monster one space closer to the destination by evaluating the feasibility
 /// of moves in different directions. If the destination is occupied by an accessible enemy within
-/// melee range (including whip/spear), the monster will attack instead of moving. 
+/// melee range (including whip/spear), the monster will attack instead of moving.
 /// @param monst the monster
 /// @param targetLoc the destination
 /// @param willingToAttackPlayer
@@ -2930,8 +2930,8 @@ void monsterMillAbout(creature *monst, short movementChance) {
     }
 }
 
-/// @brief Handles the given allied monster's turn under normal circumstances 
-/// e.g. not discordant, fleeing, paralyzed or entranced 
+/// @brief Handles the given allied monster's turn under normal circumstances
+/// e.g. not discordant, fleeing, paralyzed or entranced
 /// @param monst the allied monster
 void moveAlly(creature *monst) {
     creature *closestMonster = NULL;
@@ -3595,14 +3595,14 @@ void setMonsterLocation(creature *monst, pos newLoc) {
     }
 }
 
-/// @brief Tries to move a monster one space or perform a melee attack in the given direction. 
-/// Handles confused movement, turn-consuming non-movement actions like vomiting, and unique 
+/// @brief Tries to move a monster one space or perform a melee attack in the given direction.
+/// Handles confused movement, turn-consuming non-movement actions like vomiting, and unique
 /// attack patterns (axe-like, whip, spear). Fast-moving monsters get 2 turns, moving one
 /// space each time.
 /// @param monst the monster
 /// @param dx the x axis component of the direction [-1, 0, 1]
 /// @param dy the y axis component of the direction [-1, 0, 1]
-/// @return true if a turn-consuming action was performed. otherwise false (e.g. monster is 
+/// @return true if a turn-consuming action was performed. otherwise false (e.g. monster is
 /// unwilling to attack or blocked by terrain)
 boolean moveMonster(creature *monst, short dx, short dy) {
     short x = monst->loc.x, y = monst->loc.y;
@@ -3624,6 +3624,24 @@ boolean moveMonster(creature *monst, short dx, short dy) {
         //DEBUG printf("\nProblem! Monster trying to move more than one space at a time.");
         return false;
     }
+
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatStuck) {
+        if (monst == &player) {
+            monst->status[STATUS_STUCK] = 0;
+        }
+    }
+    if (rogue.cheatConfusion) {
+        if (monst == &player) {
+            monst->status[STATUS_CONFUSED] = 0;
+            monst->status[STATUS_HALLUCINATING] = 0;
+            monst->status[STATUS_PARALYZED] = 0;
+            monst->status[STATUS_NAUSEOUS] = 0;
+            monst->status[STATUS_DISCORDANT] = 0;
+            monst->status[STATUS_ENTRANCED] = 0;
+        }
+    }
+    // End Olivers Cheat Hack
 
     // vomiting
     if (monst->status[STATUS_NAUSEOUS] && rand_percent(25)) {

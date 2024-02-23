@@ -165,6 +165,9 @@ void initializeRogue(uint64_t seed) {
     item *theItem;
     boolean playingback, playbackFF, playbackPaused, wizard, easy, displayStealthRangeMode;
     boolean trueColorMode;
+    // Begin Olivers Cheat Hack
+    boolean cheatHealth, cheatNutrition, cheatMagicMap, cheatIdentify, cheatConfusion, cheatStuck, cheatLight;
+    // End Olivers Cheat Hack
     short oldRNG;
     char currentGamePath[BROGUE_FILENAME_MAX];
 
@@ -175,6 +178,15 @@ void initializeRogue(uint64_t seed) {
     easy = rogue.easyMode;
     displayStealthRangeMode = rogue.displayStealthRangeMode;
     trueColorMode = rogue.trueColorMode;
+    // Begin Olivers Cheat Hack
+    cheatHealth    = rogue.cheatHealth;
+    cheatNutrition = rogue.cheatNutrition;
+    cheatMagicMap  = rogue.cheatMagicMap;
+    cheatIdentify  = rogue.cheatIdentify;
+    cheatConfusion = rogue.cheatConfusion;
+    cheatStuck     = rogue.cheatStuck;
+    cheatLight     = rogue.cheatLight;
+    // End Olivers Cheat Hack
 
     strcpy(currentGamePath, rogue.currentGamePath);
 
@@ -190,6 +202,15 @@ void initializeRogue(uint64_t seed) {
     rogue.easyMode = easy;
     rogue.displayStealthRangeMode = displayStealthRangeMode;
     rogue.trueColorMode = trueColorMode;
+    // Begin Olivers Cheat Hack
+    rogue.cheatHealth    = cheatHealth;
+    rogue.cheatNutrition = cheatNutrition;
+    rogue.cheatMagicMap  = cheatMagicMap;
+    rogue.cheatIdentify  = cheatIdentify;
+    rogue.cheatConfusion = cheatConfusion;
+    rogue.cheatStuck     = cheatStuck;
+    rogue.cheatLight     = cheatLight;
+    // End Olivers Cheat Hack
 
     rogue.gameHasEnded = false;
     rogue.gameInProgress = true;
@@ -632,9 +653,13 @@ void startLevel(short oldLevelNumber, short stairDirection) {
 
     //  Prepare the new level
     rogue.minersLightRadius = (DCOLS - 1) * FP_FACTOR;
-    for (i = 0; i < rogue.depthLevel * gameConst->depthAccelerator; i++) {
-        rogue.minersLightRadius = rogue.minersLightRadius * 85 / 100;
+    // Begin Olivers Cheat Hack
+    if (!rogue.cheatLight) {
+        for (i = 0; i < rogue.depthLevel * gameConst->depthAccelerator; i++) {
+            rogue.minersLightRadius = rogue.minersLightRadius * 85 / 100;
+        }
     }
+    // End Olivers Cheat Hack
     rogue.minersLightRadius += FP_FACTOR * 225 / 100;
     updateColors();
     updateRingBonuses(); // also updates miner's light
@@ -850,6 +875,35 @@ void startLevel(short oldLevelNumber, short stairDirection) {
         freeGrid(mapToPit);
     }
 
+    // Begin Olivers Cheat Hack
+    // Copied from Items.c : "case SCROLL_MAGIC_MAPPING"
+    if (rogue.cheatMagicMap) {
+        for (i=0; i<DCOLS; i++) {
+            for (j=0; j<DROWS; j++) {
+                if (cellHasTMFlag(i, j, TM_IS_SECRET)) {
+                    discover(i, j);
+                    magicMapCell(i, j);
+                    pmap[i][j].flags &= ~(STABLE_MEMORY | DISCOVERED);
+                }
+            }
+        }
+        for (i=0; i<DCOLS; i++) {
+            for (j=0; j<DROWS; j++) {
+                if (!(pmap[i][j].flags & DISCOVERED) && pmap[i][j].layers[DUNGEON] != GRANITE) {
+                    magicMapCell(i, j);
+                }
+            }
+        }
+        for (i=0; i<DCOLS; i++) {
+            for (j=0; j<DROWS; j++) {
+                if (!(cellHasTerrainFlag(i, j, T_IS_DF_TRAP))) {
+                    pmap[i][j].flags |= KNOWN_TO_BE_TRAP_FREE;
+                }
+            }
+        }
+    }
+    // End Olivers Cheat Hack
+
     updateMapToShore();
     updateVision(true);
     rogue.stealthRange = currentStealthRange();
@@ -905,7 +959,7 @@ static void removeDeadMonstersFromList(creatureList *list) {
             removeCreature(list, decedent);
             if (decedent->leader == &player
                 && !(decedent->bookkeepingFlags & MB_DOES_NOT_RESURRECT)
-                && (!(decedent->info.flags & MONST_INANIMATE) 
+                && (!(decedent->info.flags & MONST_INANIMATE)
                     || (monsterCatalog[decedent->info.monsterID].abilityFlags & MA_ENTER_SUMMONS))
                 && (decedent->bookkeepingFlags & MB_WEAPON_AUTO_ID)
                 && !(decedent->bookkeepingFlags & MB_ADMINISTRATIVE_DEATH)) {

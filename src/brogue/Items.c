@@ -639,7 +639,7 @@ void populateItems(pos upstairs) {
         } else if (rogue.depthLevel > gameConst->amuletLevel) {
             theCategory = GEM;
         } else {
-            
+
             for (int j = 0; j < gameConst->numberMeteredItems; j++) {
                 // Create any metered items that reach generation thresholds
                 if (meteredItemsGenerationTable[j].levelScaling != 0 &&
@@ -1800,6 +1800,14 @@ short apparentRingBonus(const enum ringKind kind) {
             }
         }
     }
+    // Begin Olivers Cheat Hack
+    // If there will be ever any need to make _ALL_ rings effect,
+    // not just the worn ones but the carried ones as well,
+    // Then this is the place to insert the code...
+    // Currently it only iterates through ringLeft and ringRight,
+    // but a second iteration loop could go through the backpack items
+    // and if type == ring then retval += ...
+    // End Olivers Cheat Hack
     return retval;
 }
 
@@ -2743,7 +2751,22 @@ char displayInventory(unsigned short categoryMask,
         return 0;
     }
 
-    magicDetected = false;
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatIdentify) {
+        for (theItem = packItems->nextItem; theItem != NULL; theItem = theItem->nextItem) {
+            identify(theItem);
+            //itemName(theItem, buf, true, true, NULL);
+            updateIdentifiableItems();
+            //if (theItem->category & CAN_BE_DETECTED) {detectMagicOnItem(theItem);}
+            detectMagicOnItem(theItem);
+        }
+        magicDetected = true;
+    } else {
+        // This is the original code within this "else" branch
+        magicDetected = false;
+    }
+    // End Olivers Cheat Hack
+
     for (theItem = packItems->nextItem; theItem != NULL; theItem = theItem->nextItem) {
         if (displayMagicCharForItem(theItem) && (theItem->flags & ITEM_MAGIC_DETECTED)) {
             magicDetected = true;
@@ -7098,6 +7121,7 @@ void drinkPotion(item *theItem) {
 
     itemTable potionTable = tableForItemCategory(theItem->category)[theItem->kind];
 
+    // Begin Olivers Cheat Hack ZONE:
     switch (theItem->kind) {
         case POTION_LIFE:
             magnitude = randClump(potionTable.range);
@@ -7111,17 +7135,20 @@ void drinkPotion(item *theItem) {
             messageWithColor(buf, &advancementMessageColor, 0);
             break;
         case POTION_HALLUCINATION:
+            if (rogue.cheatConfusion) break;
             magnitude = randClump(potionTable.range);
             player.status[STATUS_HALLUCINATING] = player.maxStatus[STATUS_HALLUCINATING] = magnitude;
             message("colors are everywhere! The walls are singing!", 0);
             break;
         case POTION_INCINERATION:
             //colorFlash(&darkOrange, 0, IN_FIELD_OF_VIEW, 4, 4, player.loc.x, player.loc.y);
+            if (rogue.cheatConfusion) break;
             message("as you uncork the flask, it explodes in flame!", 0);
             spawnDungeonFeature(player.loc.x, player.loc.y, &dungeonFeatureCatalog[DF_INCINERATION_POTION], true, false);
             exposeCreatureToFire(&player);
             break;
         case POTION_DARKNESS:
+            if (rogue.cheatConfusion) break;
             magnitude = randClump(potionTable.range);
             player.status[STATUS_DARKNESS] = max(magnitude, player.status[STATUS_DARKNESS]);
             player.maxStatus[STATUS_DARKNESS] = max(magnitude, player.maxStatus[STATUS_DARKNESS]);
@@ -7150,10 +7177,12 @@ void drinkPotion(item *theItem) {
             createFlare(player.loc.x, player.loc.y, POTION_STRENGTH_LIGHT);
             break;
         case POTION_POISON:
+            if (rogue.cheatConfusion) break;
             spawnDungeonFeature(player.loc.x, player.loc.y, &dungeonFeatureCatalog[DF_POISON_GAS_CLOUD_POTION], true, false);
             message("caustic gas billows out of the open flask!", 0);
             break;
         case POTION_PARALYSIS:
+            if (rogue.cheatConfusion) break;
             spawnDungeonFeature(player.loc.x, player.loc.y, &dungeonFeatureCatalog[DF_PARALYSIS_GAS_CLOUD_POTION], true, false);
             message("your muscles stiffen as a cloud of pink gas bursts from the open flask!", 0);
             break;
@@ -7168,6 +7197,7 @@ void drinkPotion(item *theItem) {
             message("you float into the air!", 0);
             break;
         case POTION_CONFUSION:
+            if (rogue.cheatConfusion) break;
             spawnDungeonFeature(player.loc.x, player.loc.y, &dungeonFeatureCatalog[DF_CONFUSION_GAS_CLOUD_POTION], true, false);
             message("a shimmering cloud of rainbow-colored gas billows out of the open flask!", 0);
             break;
@@ -7688,6 +7718,11 @@ boolean unequipItem(item *theItem, boolean force) {
 void updateRingBonuses() {
     short i;
     item *rings[2] = {rogue.ringLeft, rogue.ringRight};
+
+    // Begin Olivers Cheat Hack
+    //   May be another good location in the code to inject cheat feature
+    //   that applies all Ring bonuses carried in the backpack as well.
+    // End Olivers Cheat Hack
 
     rogue.clairvoyance = rogue.stealthBonus = rogue.transference
     = rogue.awarenessBonus = rogue.regenerationBonus = rogue.wisdomBonus = rogue.reaping = 0;

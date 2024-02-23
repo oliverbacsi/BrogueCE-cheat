@@ -27,6 +27,13 @@
 
 void exposeCreatureToFire(creature *monst) {
     char buf[COLS], buf2[COLS];
+
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth) {
+        if (monst == &player) return;
+    }
+    // End Olivers Cheat Hack
+
     if ((monst->bookkeepingFlags & MB_IS_DYING)
         || monst->status[STATUS_IMMUNE_TO_FIRE]
         || (monst->info.flags & MONST_INVULNERABLE)
@@ -105,6 +112,53 @@ void applyInstantTileEffectsToCreature(creature *monst) {
     enum dungeonLayers layer;
     item *theItem;
 
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth) {
+        player.currentHP = player.info.maxHP;
+        if (monst == &player) {
+            monst->currentHP = monst->info.maxHP;
+        }
+    }
+    if (rogue.cheatNutrition) {
+        player.status[STATUS_NUTRITION] = STOMACH_SIZE;
+        if (monst == &player) {
+            monst->status[STATUS_NUTRITION] = STOMACH_SIZE;
+        }
+    }
+    if (rogue.cheatConfusion) {
+        player.status[STATUS_WEAKENED] = 0;
+        player.status[STATUS_HALLUCINATING] = 0;
+        player.status[STATUS_SLOWED] = 0;
+        player.status[STATUS_CONFUSED] = 0;
+        player.status[STATUS_BURNING] = 0;
+        player.status[STATUS_PARALYZED] = 0;
+        player.status[STATUS_POISONED] = 0;
+        player.status[STATUS_NAUSEOUS] = 0;
+        player.status[STATUS_DISCORDANT] = 0;
+        player.status[STATUS_ENTRANCED] = 0;
+        player.status[STATUS_DARKNESS] = 0;
+        if (monst == &player) {
+            monst->status[STATUS_WEAKENED] = 0;
+            monst->status[STATUS_HALLUCINATING] = 0;
+            monst->status[STATUS_SLOWED] = 0;
+            monst->status[STATUS_CONFUSED] = 0;
+            monst->status[STATUS_BURNING] = 0;
+            monst->status[STATUS_PARALYZED] = 0;
+            monst->status[STATUS_POISONED] = 0;
+            monst->status[STATUS_NAUSEOUS] = 0;
+            monst->status[STATUS_DISCORDANT] = 0;
+            monst->status[STATUS_ENTRANCED] = 0;
+            monst->status[STATUS_DARKNESS] = 0;
+        }
+    }
+    if (rogue.cheatStuck) {
+        player.status[STATUS_STUCK] = 0;
+        if (monst == &player) {
+            monst->status[STATUS_STUCK] = 0;
+        }
+    }
+    // End Olivers Cheat Hack
+
     if (monst->bookkeepingFlags & MB_IS_DYING) {
         return; // the monster is already dead.
     }
@@ -169,6 +223,10 @@ void applyInstantTileEffectsToCreature(creature *monst) {
         && cellHasTerrainFlag(*x, *y, T_LAVA_INSTA_DEATH)) {
 
         if (monst == &player) {
+            // Begin Olivers Cheat Hack
+            // Okay I have noticed this, but currently I see no reason to
+            // remove this section with an if(rogue.cheatHealth)
+            // End Olivers Cheat Hack
             sprintf(buf, "you plunge into %s!",
                     tileCatalog[pmap[*x][*y].layers[layerWithFlag(*x, *y, T_LAVA_INSTA_DEATH)]].description);
             message(buf, REQUIRE_ACKNOWLEDGMENT);
@@ -281,12 +339,18 @@ void applyInstantTileEffectsToCreature(creature *monst) {
 
         monst->status[STATUS_STUCK] = monst->maxStatus[STATUS_STUCK] = rand_range(3, 7);
         if (monst == &player) {
-            if (!rogue.automationActive) {
-                // Don't interrupt exploration with this message.
-                sprintf(buf2, "you are stuck fast in %s!",
-                        tileCatalog[pmap[*x][*y].layers[layerWithFlag(*x, *y, T_ENTANGLES)]].description);
-                message(buf2, 0);
+            // Begin Olivers Cheat Hack
+            if (!rogue.cheatStuck) {
+                // Begin Original Code
+                if (!rogue.automationActive) {
+                    // Don't interrupt exploration with this message.
+                    sprintf(buf2, "you are stuck fast in %s!",
+                            tileCatalog[pmap[*x][*y].layers[layerWithFlag(*x, *y, T_ENTANGLES)]].description);
+                    message(buf2, 0);
+                }
+                // End Original Code
             }
+            // End Olivers Cheat Hack
         } else if (canDirectlySeeMonster(monst)) { // it's a monster
             if (!rogue.automationActive) {
                 monsterName(buf, monst, true);
@@ -304,21 +368,29 @@ void applyInstantTileEffectsToCreature(creature *monst) {
         damage = max(damage, monst->info.maxHP / 2);
         monst->status[STATUS_EXPLOSION_IMMUNITY] = 5;
         if (monst == &player) {
-            rogue.disturbed = true;
-            for (layer = 0; layer < NUMBER_TERRAIN_LAYERS && !(tileCatalog[pmap[*x][*y].layers[layer]].flags & T_CAUSES_EXPLOSIVE_DAMAGE); layer++);
-            message(tileCatalog[pmap[*x][*y].layers[layer]].flavorText, 0);
-            if (rogue.armor && (rogue.armor->flags & ITEM_RUNIC) && rogue.armor->enchant2 == A_DAMPENING) {
-                itemName(rogue.armor, buf2, false, false, NULL);
-                sprintf(buf, "Your %s pulses and absorbs the damage.", buf2);
-                messageWithColor(buf, &goodMessageColor, 0);
-                autoIdentify(rogue.armor);
-            } else if (inflictDamage(NULL, &player, damage, &yellow, false)) {
-                killCreature(&player, false);
-                strcpy(buf2, tileCatalog[pmap[*x][*y].layers[layerWithFlag(*x, *y, T_CAUSES_EXPLOSIVE_DAMAGE)]].description);
-                sprintf(buf, "Killed by %s", buf2);
-                gameOver(buf, true);
-                return;
+            // Begin Olivers Cheat Hack
+            if (rogue.cheatHealth) {
+                damage = 0;
+            } else {
+                // Begin Original Code
+                rogue.disturbed = true;
+                for (layer = 0; layer < NUMBER_TERRAIN_LAYERS && !(tileCatalog[pmap[*x][*y].layers[layer]].flags & T_CAUSES_EXPLOSIVE_DAMAGE); layer++);
+                message(tileCatalog[pmap[*x][*y].layers[layer]].flavorText, 0);
+                if (rogue.armor && (rogue.armor->flags & ITEM_RUNIC) && rogue.armor->enchant2 == A_DAMPENING) {
+                    itemName(rogue.armor, buf2, false, false, NULL);
+                    sprintf(buf, "Your %s pulses and absorbs the damage.", buf2);
+                    messageWithColor(buf, &goodMessageColor, 0);
+                    autoIdentify(rogue.armor);
+                } else if (inflictDamage(NULL, &player, damage, &yellow, false)) {
+                    killCreature(&player, false);
+                    strcpy(buf2, tileCatalog[pmap[*x][*y].layers[layerWithFlag(*x, *y, T_CAUSES_EXPLOSIVE_DAMAGE)]].description);
+                    sprintf(buf, "Killed by %s", buf2);
+                    gameOver(buf, true);
+                    return;
+                }
+                // End Original Code
             }
+            // End Olivers Cheat Hack
         } else { // it's a monster
             if (monst->creatureState == MONSTER_SLEEPING) {
                 monst->creatureState = MONSTER_TRACKING_SCENT;
@@ -365,17 +437,23 @@ void applyInstantTileEffectsToCreature(creature *monst) {
             if (monst == &player) {
                 rogue.disturbed = true;
             }
-            if (canDirectlySeeMonster(monst) && !(monst->status[STATUS_NAUSEOUS])) {
-                if (monst->creatureState == MONSTER_SLEEPING) {
-                    monst->creatureState = MONSTER_TRACKING_SCENT;
-                }
-                flashMonster(monst, &brown, 100);
-                monsterName(buf, monst, true);
-                sprintf(buf2, "%s choke%s and gag%s on the overpowering stench of decay.", buf,
+            // Begin Olivers Cheat Hack
+            if ( !( (monst == &player) && rogue.cheatConfusion) ) {
+                // Begin Original Code
+                if (canDirectlySeeMonster(monst) && !(monst->status[STATUS_NAUSEOUS])) {
+                    if (monst->creatureState == MONSTER_SLEEPING) {
+                        monst->creatureState = MONSTER_TRACKING_SCENT;
+                    }
+                    flashMonster(monst, &brown, 100);
+                    monsterName(buf, monst, true);
+                    sprintf(buf2, "%s choke%s and gag%s on the overpowering stench of decay.", buf,
                         (monst == &player ? "": "s"), (monst == &player ? "": "s"));
-                message(buf2, 0);
+                    message(buf2, 0);
+                }
+                monst->status[STATUS_NAUSEOUS] = monst->maxStatus[STATUS_NAUSEOUS] = max(monst->status[STATUS_NAUSEOUS], 20);
+                // End Original Code
             }
-            monst->status[STATUS_NAUSEOUS] = monst->maxStatus[STATUS_NAUSEOUS] = max(monst->status[STATUS_NAUSEOUS], 20);
+            // End Olivers Cheat Hack
         }
 
         // confusion gas
@@ -383,16 +461,22 @@ void applyInstantTileEffectsToCreature(creature *monst) {
             if (monst == &player) {
                 rogue.disturbed = true;
             }
-            if (canDirectlySeeMonster(monst) && !(monst->status[STATUS_CONFUSED])) {
-                if (monst->creatureState == MONSTER_SLEEPING) {
-                    monst->creatureState = MONSTER_TRACKING_SCENT;
+            // Begin Olivers Cheat Hack
+            if ( !( (monst == &player) && rogue.cheatConfusion) ) {
+                // Begin Original Code
+                if (canDirectlySeeMonster(monst) && !(monst->status[STATUS_CONFUSED])) {
+                    if (monst->creatureState == MONSTER_SLEEPING) {
+                        monst->creatureState = MONSTER_TRACKING_SCENT;
+                    }
+                    flashMonster(monst, &confusionGasColor, 100);
+                    monsterName(buf, monst, true);
+                    sprintf(buf2, "%s %s very confused!", buf, (monst == &player ? "feel": "looks"));
+                    message(buf2, 0);
                 }
-                flashMonster(monst, &confusionGasColor, 100);
-                monsterName(buf, monst, true);
-                sprintf(buf2, "%s %s very confused!", buf, (monst == &player ? "feel": "looks"));
-                message(buf2, 0);
+                monst->status[STATUS_CONFUSED] = monst->maxStatus[STATUS_CONFUSED] = max(monst->status[STATUS_CONFUSED], 25);
+                // End Original Code
             }
-            monst->status[STATUS_CONFUSED] = monst->maxStatus[STATUS_CONFUSED] = max(monst->status[STATUS_CONFUSED], 25);
+            // End Olivers Cheat Hack
         }
 
         // paralysis gas
@@ -400,13 +484,19 @@ void applyInstantTileEffectsToCreature(creature *monst) {
             && !(monst->info.flags & (MONST_INANIMATE | MONST_INVULNERABLE))
             && !(monst->bookkeepingFlags & MB_SUBMERGED)) {
 
-            if (canDirectlySeeMonster(monst) && !monst->status[STATUS_PARALYZED]) {
-                flashMonster(monst, &pink, 100);
-                monsterName(buf, monst, true);
-                sprintf(buf2, "%s %s paralyzed!", buf, (monst == &player ? "are": "is"));
-                message(buf2, (monst == &player) ? REQUIRE_ACKNOWLEDGMENT : 0);
+            // Begin Olivers Cheat Hack
+            if ( !( (monst == &player) && rogue.cheatConfusion) ) {
+                // Begin Original Code
+                if (canDirectlySeeMonster(monst) && !monst->status[STATUS_PARALYZED]) {
+                    flashMonster(monst, &pink, 100);
+                    monsterName(buf, monst, true);
+                    sprintf(buf2, "%s %s paralyzed!", buf, (monst == &player ? "are": "is"));
+                    message(buf2, (monst == &player) ? REQUIRE_ACKNOWLEDGMENT : 0);
+                }
+                monst->status[STATUS_PARALYZED] = monst->maxStatus[STATUS_PARALYZED] = max(monst->status[STATUS_PARALYZED], 20);
+                // End Original Code
             }
-            monst->status[STATUS_PARALYZED] = monst->maxStatus[STATUS_PARALYZED] = max(monst->status[STATUS_PARALYZED], 20);
+            // End Olivers Cheat Hack
             if (monst == &player) {
                 rogue.disturbed = true;
             }
@@ -421,17 +511,25 @@ void applyInstantTileEffectsToCreature(creature *monst) {
         if (monst == &player && !player.status[STATUS_POISONED]) {
             rogue.disturbed = true;
         }
-        if (canDirectlySeeMonster(monst) && !(monst->status[STATUS_POISONED])) {
-            if (monst->creatureState == MONSTER_SLEEPING) {
-                monst->creatureState = MONSTER_TRACKING_SCENT;
+        // Begin Olivers Cheat Hack
+        if ( !( (monst == &player) && rogue.cheatConfusion) ) {
+            // Begin Original Code
+            if (canDirectlySeeMonster(monst) && !(monst->status[STATUS_POISONED])) {
+                if (monst->creatureState == MONSTER_SLEEPING) {
+                    monst->creatureState = MONSTER_TRACKING_SCENT;
+                }
+                flashMonster(monst, &green, 100);
+                monsterName(buf, monst, true);
+                sprintf(buf2, "the lichen's grasping tendrils poison %s.", buf);
+                messageWithColor(buf2, messageColorFromVictim(monst), 0);
             }
-            flashMonster(monst, &green, 100);
-            monsterName(buf, monst, true);
-            sprintf(buf2, "the lichen's grasping tendrils poison %s.", buf);
-            messageWithColor(buf2, messageColorFromVictim(monst), 0);
+            damage = max(0, 5 - monst->status[STATUS_POISONED]);
+            addPoison(monst, damage, 0); // Lichen doesn't increase poison concentration above 1.
+            // End Original Code
+        } else {
+            damage = 0;
         }
-        damage = max(0, 5 - monst->status[STATUS_POISONED]);
-        addPoison(monst, damage, 0); // Lichen doesn't increase poison concentration above 1.
+        // End Olivers Cheat Hack
     }
 
     // fire
@@ -805,6 +903,10 @@ void checkNutrition() {
     item *theItem;
     char buf[DCOLS*3], foodWarning[DCOLS*3];
 
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatNutrition) {player.status[STATUS_NUTRITION] = STOMACH_SIZE;}
+    // End Olivers Cheat Hack
+
     if (numberOfMatchingPackItems(FOOD, 0, 0, false) == 0) {
         sprintf(foodWarning, " and have no food");
     } else {
@@ -888,6 +990,9 @@ void handleHealthAlerts() {
     poisonThresholdsCount = 3;
 
     assureCosmeticRNG;
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth) {player.currentHP = player.info.maxHP;}
+    // End Olivers Cheat Hack
 
     currentPercent = player.currentHP * 100 / player.info.maxHP;
     previousPercent = player.previousHealthPoints * 100 / player.info.maxHP;
@@ -1964,6 +2069,27 @@ void monstersApproachStairs() {
 }
 
 void decrementPlayerStatus() {
+
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth) {player.currentHP = player.info.maxHP;}
+    // Cheat Nutrition is not needed as the next section of original code
+    // will invoke checkNutrition() and it does the job.
+    if (rogue.cheatConfusion) {
+        player.status[STATUS_WEAKENED] = 0;
+        player.status[STATUS_HALLUCINATING] = 0;
+        player.status[STATUS_SLOWED] = 0;
+        player.status[STATUS_CONFUSED] = 0;
+        player.status[STATUS_BURNING] = 0;
+        player.status[STATUS_PARALYZED] = 0;
+        player.status[STATUS_POISONED] = 0;
+        player.status[STATUS_NAUSEOUS] = 0;
+        player.status[STATUS_DISCORDANT] = 0;
+        player.status[STATUS_ENTRANCED] = 0;
+        player.status[STATUS_DARKNESS] = 0;
+    }
+    if (rogue.cheatStuck) {player.status[STATUS_STUCK] = 0;}
+    // End Olivers Cheat Hack
+
     // Handle hunger.
     if (!player.status[STATUS_PARALYZED]) {
         // No nutrition is expended while paralyzed.

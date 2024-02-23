@@ -1,6 +1,43 @@
 Brogue CE
 =========
 
+# Oliver's Cheat Hacks
+
+> This is the Cheat Hacked version of the original Brogue CE game !!!
+
+For those lamers and n00bs for whom even the Wizard Mode is not good enough, or are fed up with starving or still getting affected by poisions or bolts or still dying of whatever, or simply don't need the full Wizard package just one thing of minor help for practicing purposes, here comes the cheated version of Brogue CE.  
+You can invoke the game with any of the following command-line arguments to get one thing or more things cheated at the same time:
+
+* **`--cheatHealth`**
+	* Your Health Points never decrease. Nothing can affect or poison You.
+	* You win all Your battles instantly with one hit, while Your enemies always lose.
+* **`--cheatNutrition`**
+	* Your Nutrition will never decrease. No more dying on hunger.
+* **`--cheatMagicMap`**
+	* All levels get instantly Magic Mapped upon entering.
+	* No more hidden rooms or features.
+* **`--cheatIdentify`**
+	* All picked up items will be instantly identified in Your backpack when viewing inventory.
+	* This includes the "Detect Magic" feature as well, so items will show up with their blue/red icon.
+* **`--cheatConfusion`**
+	* Never get influenced by Confusion or any negative effects again.
+	* This includes: Confusion, Hallucination, Paralysis, Poison, Nausea, Entrancement, Discord, Darkness, etc, all this crap.
+	* Not depending if it comes from drinking a potion, gas trap, or magical hit from an enemy. You can literally drink anything.
+* **`--cheatStuck`**
+	* Don't get stuck in webs, be always free to move.
+	* Applies for net traps as well as for spider monster's web.
+* **`--cheatLight`**
+	* No darkening and no shrinking of visibility radius on deper levels.
+* **`--cheatALL`**
+	* Switch on **all** above cheats. To keep You from typing too much.
+
+Have fun playing!  
+And don't forget: if You are trained enough using the cheats, then try the game with no cheats as well!
+
+---
+
+# Original description of this repository:
+
 > *Countless adventurers before you have descended this torch-lit staircase,
 > seeking the promised riches below. As you reach the bottom and step into
 > the wide cavern, the doors behind you seal with a powerful magic...*

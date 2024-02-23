@@ -527,7 +527,7 @@ boolean freeCaptivesEmbeddedAt(short x, short y) {
 }
 
 /// @brief Ask the player for confirmation before attacking an acidic monster
-/// @param hitList the creature(s) getting attacked 
+/// @param hitList the creature(s) getting attacked
 /// @return true to abort the attack
 boolean abortAttackAgainstAcidicTarget(creature *hitList[8]) {
     short i;
@@ -560,7 +560,7 @@ boolean abortAttackAgainstAcidicTarget(creature *hitList[8]) {
 }
 
 /// @brief Ask the player for confirmation before attacking a discordant ally
-/// @param hitList the creature(s) getting attacked 
+/// @param hitList the creature(s) getting attacked
 /// @return true to abort the attack
 static boolean abortAttackAgainstDiscordantAlly(const creature *hitList[8]) {
 
@@ -580,26 +580,26 @@ static boolean abortAttackAgainstDiscordantAlly(const creature *hitList[8]) {
             }
         }
     }
-    return false; // the confirmation dialog was not shown 
+    return false; // the confirmation dialog was not shown
 }
 
 /// @brief Determines if a player attack against the given creature(s) should be aborted. A confirmation
-/// dialog is shown when attempting to attack an acidic monster or discordant ally, unless confused or 
-/// hallucinating (but not telepathic). 
-/// @param hitList the creature(s) getting attacked 
+/// dialog is shown when attempting to attack an acidic monster or discordant ally, unless confused or
+/// hallucinating (but not telepathic).
+/// @param hitList the creature(s) getting attacked
 /// @return true to abort the attack
 static boolean abortAttack(const creature *hitList[8]) {
 
     // too bad so sad if you're confused or hallucinating (but not telepathic)
-    if (player.status[STATUS_CONFUSED] 
+    if (player.status[STATUS_CONFUSED]
         || (player.status[STATUS_HALLUCINATING] && !player.status[STATUS_TELEPATHIC])) {
         return false;
     }
 
-    if (abortAttackAgainstAcidicTarget(hitList) 
+    if (abortAttackAgainstAcidicTarget(hitList)
         || abortAttackAgainstDiscordantAlly(hitList)) {
         return true;
-    }    
+    }
 
     return false; // either the player confirmed the attack or the confirmation dialog was not shown
 }
@@ -830,6 +830,18 @@ boolean playerMoves(short direction) {
     if (!coordinatesAreInMap(newX, newY)) {
         return false;
     }
+
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatStuck) { player.status[STATUS_STUCK] = 0; }
+    if (rogue.cheatConfusion) {
+        player.status[STATUS_CONFUSED] = 0;
+        player.status[STATUS_HALLUCINATING] = 0;
+        player.status[STATUS_PARALYZED] = 0;
+        player.status[STATUS_NAUSEOUS] = 0;
+        player.status[STATUS_DISCORDANT] = 0;
+        player.status[STATUS_ENTRANCED] = 0;
+    }
+    // End Olivers Cheat Hack
 
     // Save thet keystroke up-front; we'll revert if the player cancels.
     recordKeystroke(directionKeys[initialDirection], false, false);

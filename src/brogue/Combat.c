@@ -107,6 +107,30 @@ short hitProbability(creature *attacker, creature *defender) {
     short defense = monsterDefenseAdjusted(defender);
     short hitProbability;
 
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth) {
+        if (attacker == &player) {
+            return 100;
+        } else {
+            return 0;
+        }
+    }
+    if (rogue.cheatStuck) {
+        if (defender == &player) {
+            defender->status[STATUS_STUCK] = 0;
+        }
+    }
+    if (rogue.cheatConfusion) {
+        if (defender == &player) {
+            defender->status[STATUS_CONFUSED] = 0;
+            defender->status[STATUS_HALLUCINATING] = 0;
+            defender->status[STATUS_PARALYZED] = 0;
+            defender->status[STATUS_NAUSEOUS] = 0;
+            defender->status[STATUS_DISCORDANT] = 0;
+            defender->status[STATUS_ENTRANCED] = 0;
+        }
+    }
+    // End Olivers Cheat Hack
     if (defender->status[STATUS_STUCK] || (defender->bookkeepingFlags & MB_CAPTIVE)) {
         return 100;
     }
@@ -304,6 +328,24 @@ short alliedCloneCount(creature *monst) {
 // This can be things like melee attacks, fire/lightning attacks or throwing a weapon.
 void moralAttack(creature *attacker, creature *defender) {
 
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatStuck) {
+        if (defender == &player) {
+            defender->status[STATUS_STUCK] = 0;
+        }
+    }
+    if (rogue.cheatConfusion) {
+        if (defender == &player) {
+            defender->status[STATUS_CONFUSED] = 0;
+            defender->status[STATUS_HALLUCINATING] = 0;
+            defender->status[STATUS_PARALYZED] = 0;
+            defender->status[STATUS_NAUSEOUS] = 0;
+            defender->status[STATUS_DISCORDANT] = 0;
+            defender->status[STATUS_ENTRANCED] = 0;
+        }
+    }
+    // End Olivers Cheat Hack
+
     if (attacker == &player && canSeeMonster(defender)) {
         rogue.featRecord[FEAT_PACIFIST] = false;
         if (defender->creatureState != MONSTER_TRACKING_SCENT) {
@@ -355,16 +397,28 @@ void moralAttack(creature *attacker, creature *defender) {
 }
 
 boolean playerImmuneToMonster(creature *monst) {
-    if (monst != &player
-        && rogue.armor
-        && (rogue.armor->flags & ITEM_RUNIC)
-        && (rogue.armor->enchant2 == A_IMMUNITY)
-        && monsterIsInClass(monst, rogue.armor->vorpalEnemy)) {
-
-        return true;
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth) {
+        if (monst != &player) {
+            return true;
+        } else {
+            return false;
+        }
     } else {
-        return false;
+        // This is the original code in the "else" branch
+        if (monst != &player
+            && rogue.armor
+            && (rogue.armor->flags & ITEM_RUNIC)
+            && (rogue.armor->enchant2 == A_IMMUNITY)
+            && monsterIsInClass(monst, rogue.armor->vorpalEnemy)) {
+
+            return true;
+        } else {
+            return false;
+        }
+        // End original code
     }
+    // End Olivers Cheat Hack
 }
 
 void specialHit(creature *attacker, creature *defender, short damage) {
@@ -372,6 +426,13 @@ void specialHit(creature *attacker, creature *defender, short damage) {
     item *theItem = NULL, *itemFromTopOfStack;
     char buf[COLS], buf2[COLS], buf3[COLS];
 
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth) {
+        if (defender == &player) {
+            return;
+        }
+    }
+    // End Olivers Cheat Hack
     if (!(attacker->info.abilityFlags & SPECIAL_HIT)) {
         return;
     }
@@ -396,14 +457,20 @@ void specialHit(creature *attacker, creature *defender, short damage) {
             checkForDisenchantment(rogue.armor);
         }
         if (attacker->info.abilityFlags & MA_HIT_HALLUCINATE) {
-            if (!player.status[STATUS_HALLUCINATING]) {
-                combatMessage("you begin to hallucinate", 0);
+            // Begin Olivers Cheat Hack
+            if (!rogue.cheatConfusion) {
+                // Original code here
+                if (!player.status[STATUS_HALLUCINATING]) {
+                    combatMessage("you begin to hallucinate", 0);
+                }
+                if (!player.status[STATUS_HALLUCINATING]) {
+                    player.maxStatus[STATUS_HALLUCINATING] = 0;
+                }
+                player.status[STATUS_HALLUCINATING] += gameConst->onHitHallucinateDuration;
+                player.maxStatus[STATUS_HALLUCINATING] = max(player.maxStatus[STATUS_HALLUCINATING], player.status[STATUS_HALLUCINATING]);
+                // End Original code
             }
-            if (!player.status[STATUS_HALLUCINATING]) {
-                player.maxStatus[STATUS_HALLUCINATING] = 0;
-            }
-            player.status[STATUS_HALLUCINATING] += gameConst->onHitHallucinateDuration;
-            player.maxStatus[STATUS_HALLUCINATING] = max(player.maxStatus[STATUS_HALLUCINATING], player.status[STATUS_HALLUCINATING]);
+            // End Olivers Cheat Hack
         }
         if (attacker->info.abilityFlags & MA_HIT_BURN
              && !defender->status[STATUS_IMMUNE_TO_FIRE]) {
@@ -650,14 +717,20 @@ void magicWeaponHit(creature *defender, item *theItem, boolean backstabbed) {
                 autoID = true;
                 break;
             case W_PARALYSIS:
-                defender->status[STATUS_PARALYZED] = max(defender->status[STATUS_PARALYZED], weaponParalysisDuration(enchant));
-                defender->maxStatus[STATUS_PARALYZED] = defender->status[STATUS_PARALYZED];
-                if (canDirectlySeeMonster(defender)) {
-                    sprintf(buf, "%s is frozen in place", monstName);
-                    buf[DCOLS] = '\0';
-                    combatMessage(buf, messageColorFromVictim(defender));
-                    autoID = true;
+                // Begin Olivers Cheat Hack
+                if ( !( (defender == &player) && rogue.cheatConfusion ) ) {
+                    // Begin Original Code here
+                    defender->status[STATUS_PARALYZED] = max(defender->status[STATUS_PARALYZED], weaponParalysisDuration(enchant));
+                    defender->maxStatus[STATUS_PARALYZED] = defender->status[STATUS_PARALYZED];
+                    if (canDirectlySeeMonster(defender)) {
+                        sprintf(buf, "%s is frozen in place", monstName);
+                        buf[DCOLS] = '\0';
+                        combatMessage(buf, messageColorFromVictim(defender));
+                        autoID = true;
+                    }
+                    // End Original Code
                 }
+                // End Olivers Cheat Hack
                 break;
             case W_MULTIPLICITY:
                 sprintf(buf, "Your %s emits a flash of light, and %sspectral duplicate%s appear%s!",
@@ -735,14 +808,20 @@ void magicWeaponHit(creature *defender, item *theItem, boolean backstabbed) {
                 }
                 break;
             case W_CONFUSION:
-                defender->status[STATUS_CONFUSED] = max(defender->status[STATUS_CONFUSED], weaponConfusionDuration(enchant));
-                defender->maxStatus[STATUS_CONFUSED] = defender->status[STATUS_CONFUSED];
-                if (canDirectlySeeMonster(defender)) {
-                    sprintf(buf, "%s looks very confused", monstName);
-                    buf[DCOLS] = '\0';
-                    combatMessage(buf, messageColorFromVictim(defender));
-                    autoID = true;
+                // Begin Olivers Cheat Hack
+                if ( !( (defender == &player) && rogue.cheatConfusion ) ) {
+                    // Begin Original Code here
+                    defender->status[STATUS_CONFUSED] = max(defender->status[STATUS_CONFUSED], weaponConfusionDuration(enchant));
+                    defender->maxStatus[STATUS_CONFUSED] = defender->status[STATUS_CONFUSED];
+                    if (canDirectlySeeMonster(defender)) {
+                        sprintf(buf, "%s looks very confused", monstName);
+                        buf[DCOLS] = '\0';
+                        combatMessage(buf, messageColorFromVictim(defender));
+                        autoID = true;
+                    }
+                    // End Original Code
                 }
+                // End Olivers Cheat Hack
                 break;
             case W_FORCE:
                 autoID = forceWeaponHit(defender, theItem);
@@ -1004,6 +1083,32 @@ boolean attack(creature *attacker, creature *defender, boolean lungeAttack) {
     short damage, specialDamage, poisonDamage;
     char buf[COLS*2], buf2[COLS*2], attackerName[COLS], defenderName[COLS], verb[DCOLS], explicationClause[DCOLS] = "", armorRunicString[DCOLS*3];
     boolean sneakAttack, defenderWasAsleep, defenderWasParalyzed, degradesAttackerWeapon, sightUnseen;
+
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth) {
+        if (attacker == &player) {
+            killCreature(defender, false);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    if (rogue.cheatStuck) {
+        if (defender == &player) {
+            defender->status[STATUS_STUCK] = 0;
+        }
+    }
+    if (rogue.cheatConfusion) {
+        if (defender == &player) {
+            defender->status[STATUS_CONFUSED] = 0;
+            defender->status[STATUS_HALLUCINATING] = 0;
+            defender->status[STATUS_PARALYZED] = 0;
+            defender->status[STATUS_NAUSEOUS] = 0;
+            defender->status[STATUS_DISCORDANT] = 0;
+            defender->status[STATUS_ENTRANCED] = 0;
+        }
+    }
+    // End Olivers Cheat Hack
 
     if (attacker == &player && canSeeMonster(defender)) {
         rogue.featRecord[FEAT_PURE_MAGE] = false;
@@ -1380,7 +1485,7 @@ boolean anyoneWantABite(creature *decedent) {
     short **grid;
     boolean success = false;
     boolean *ourBolts;
-    
+
     ourBolts = (boolean *)calloc(gameConst->numberBoltKinds, sizeof(boolean));
 
     candidates = 0;
@@ -1498,23 +1603,34 @@ boolean inflictDamage(creature *attacker, creature *defender,
     dungeonFeature theBlood;
     short transferenceAmount;
 
-    if (damage == 0
-        || (defender->info.flags & MONST_INVULNERABLE)) {
-
-        return false;
-    }
-
-    if (!ignoresProtectionShield
-        && defender->status[STATUS_SHIELDED]) {
-
-        if (defender->status[STATUS_SHIELDED] > damage * 10) {
-            defender->status[STATUS_SHIELDED] -= damage * 10;
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth) {
+        if (defender == &player) {
             damage = 0;
         } else {
-            damage -= (defender->status[STATUS_SHIELDED] + 9) / 10;
-            defender->status[STATUS_SHIELDED] = defender->maxStatus[STATUS_SHIELDED] = 0;
+            damage = defender->currentHP;
+        }
+    } else {
+        // This is the original code in the "else" branch
+        // As the Cheat Hack comes before the invulnerability check
+        // Even invulnerable monsters will be killed :-P
+
+        if (damage == 0 || (defender->info.flags & MONST_INVULNERABLE)) {
+            return false;
+        }
+
+        if (!ignoresProtectionShield && defender->status[STATUS_SHIELDED]) {
+
+            if (defender->status[STATUS_SHIELDED] > damage * 10) {
+                defender->status[STATUS_SHIELDED] -= damage * 10;
+                damage = 0;
+            } else {
+                damage -= (defender->status[STATUS_SHIELDED] + 9) / 10;
+                defender->status[STATUS_SHIELDED] = defender->maxStatus[STATUS_SHIELDED] = 0;
+            }
         }
     }
+    // End Olivers Cheat Hack
 
     defender->bookkeepingFlags &= ~MB_ABSORBING; // Stop eating a corpse if you are getting hurt.
 
@@ -1532,35 +1648,39 @@ boolean inflictDamage(creature *attacker, creature *defender,
         wakeUp(defender);
     }
 
-    if (defender == &player
-        && rogue.easyMode
-        && damage > 0) {
-        damage = max(1, damage/5);
-    }
+    // Begin Olivers Cheat Hack : skip this whole section if cheatHealth :
+    if (!rogue.cheatHealth) {
+        if (defender == &player
+            && rogue.easyMode
+            && damage > 0) {
+            damage = max(1, damage/5);
+        }
 
-    if (((attacker == &player && rogue.transference) || (attacker && attacker != &player && (attacker->info.abilityFlags & MA_TRANSFERENCE)))
-        && !(defender->info.flags & (MONST_INANIMATE | MONST_INVULNERABLE))) {
+        if (((attacker == &player && rogue.transference) || (attacker && attacker != &player && (attacker->info.abilityFlags & MA_TRANSFERENCE)))
+            && !(defender->info.flags & (MONST_INANIMATE | MONST_INVULNERABLE))) {
 
-        transferenceAmount = min(damage, defender->currentHP); // Maximum transferred damage can't exceed the victim's remaining health.
+            transferenceAmount = min(damage, defender->currentHP); // Maximum transferred damage can't exceed the victim's remaining health.
 
-        if (attacker == &player) {
-            transferenceAmount = transferenceAmount * rogue.transference / gameConst->playerTransferenceRatio;
-            if (transferenceAmount == 0) {
-                transferenceAmount = ((rogue.transference > 0) ? 1 : -1);
+            if (attacker == &player) {
+                transferenceAmount = transferenceAmount * rogue.transference / gameConst->playerTransferenceRatio;
+                if (transferenceAmount == 0) {
+                    transferenceAmount = ((rogue.transference > 0) ? 1 : -1);
+                }
+            } else if (attacker->creatureState == MONSTER_ALLY) {
+                transferenceAmount = transferenceAmount * 4 / 10; // allies get 40% recovery rate
+            } else {
+                transferenceAmount = transferenceAmount * 9 / 10; // enemies get 90% recovery rate, deal with it
             }
-        } else if (attacker->creatureState == MONSTER_ALLY) {
-            transferenceAmount = transferenceAmount * 4 / 10; // allies get 40% recovery rate
-        } else {
-            transferenceAmount = transferenceAmount * 9 / 10; // enemies get 90% recovery rate, deal with it
-        }
 
-        attacker->currentHP += transferenceAmount;
+            attacker->currentHP += transferenceAmount;
 
-        if (attacker == &player && player.currentHP <= 0) {
-            gameOver("Drained by a cursed ring", true);
-            return false;
+            if (attacker == &player && player.currentHP <= 0) {
+                gameOver("Drained by a cursed ring", true);
+                return false;
+            }
         }
     }
+    // End Olivers Cheat Hack
 
     if (defender->currentHP <= damage) { // killed
         return true;
@@ -1591,6 +1711,12 @@ boolean inflictDamage(creature *attacker, creature *defender,
 
 void addPoison(creature *monst, short durationIncrement, short concentrationIncrement) {
     extern const color poisonColor;
+
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatHealth || rogue.cheatConfusion) {
+        if (monst == &player) return;
+    }
+    // End Olivers Cheat Hack
     if (durationIncrement > 0) {
         if (monst == &player && !player.status[STATUS_POISONED]) {
             combatMessage("scalding poison fills your veins", &badMessageColor);
@@ -1663,7 +1789,7 @@ void killCreature(creature *decedent, boolean administrativeDeath) {
         if (!administrativeDeath
             && decedent->creatureState == MONSTER_ALLY
             && !canSeeMonster(decedent)
-            && (!(decedent->info.flags & MONST_INANIMATE) 
+            && (!(decedent->info.flags & MONST_INANIMATE)
                 || (monsterCatalog[decedent->info.monsterID].abilityFlags & MA_ENTER_SUMMONS))
             && !(decedent->bookkeepingFlags & MB_BOUND_TO_LEADER)
             && !decedent->carriedMonster) {

@@ -2140,7 +2140,7 @@ enum monsterBookkeepingFlags {
     MB_ALREADY_SEEN             = Fl(23),   // seeing this monster won't interrupt exploration
     MB_ADMINISTRATIVE_DEATH     = Fl(24),   // like the `administrativeDeath` parameter to `killCreature`
     MB_HAS_DIED                 = Fl(25),   // monster has already been killed but not yet removed from `monsters`
-    MB_DOES_NOT_RESURRECT       = Fl(26)    // resurrection altars don't revive monsters summoned by allies 
+    MB_DOES_NOT_RESURRECT       = Fl(26)    // resurrection altars don't revive monsters summoned by allies
 };
 
 // Defines all creatures, which include monsters and the player:
@@ -2404,6 +2404,16 @@ typedef struct gameConstants {
 // these are basically global variables pertaining to the game state and player's unique variables:
 typedef struct playerCharacter {
     boolean wizard;                     // in wizard mode
+
+    //Begin Olivers Cheat Hacks
+    boolean cheatHealth;
+    boolean cheatNutrition;
+    boolean cheatMagicMap;
+    boolean cheatIdentify;
+    boolean cheatConfusion;
+    boolean cheatStuck;
+    boolean cheatLight;
+    //End Olivers Cheat Hacks
 
     short depthLevel;                   // which dungeon level are we on
     short deepestLevel;

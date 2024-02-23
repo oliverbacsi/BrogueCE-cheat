@@ -150,6 +150,12 @@ void updateMinersLightRadius() {
         lightRadius = max(lightRadius / 2, 3 * FP_FACTOR);
     }
 
+    // Begin Olivers Cheat Hack
+    if (rogue.cheatLight) {
+        lightRadius = 449249200ul;
+    }
+    // End Olivers Cheat Hack
+
     rogue.minersLight.radialFadeToPercent = 35 + (max(0, min(65, rogue.lightMultiplier * 5)) * fraction) / FP_FACTOR;
     rogue.minersLight.lightRadius.upperBound = rogue.minersLight.lightRadius.lowerBound = clamp(lightRadius / FP_FACTOR, -30000, 30000);
 }

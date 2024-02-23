@@ -48,7 +48,16 @@ static void printCommandlineHelp() {
     "                           prints a catalog of the first LEVELS levels of NUM\n"
     "                           seeds from seed START (defaults: 1 1000 5)\n"
     "--data-dir DIRECTORY       specify directory containing game resources (experimental)\n"
-    );
+    "                           Oliver's Cheat Hacks:\n"
+    "--cheatHealth              No damage to health, win all battles instantly\n"
+    "--cheatNutrition           No starving, nutrition always at max\n"
+    "--cheatMagicMap            All levels Magic Mapped at entering\n"
+    "--cheatIdentify            All inventory items identified including their magic\n"
+    "--cheatConfusion           Confusion, Paralysis, or any negative effects avoided\n"
+    "--cheatStuck               Do not get stuck in nets\n"
+    "--cheatLight               No darking & shrinking of light radius on deep levels\n"
+    "--cheatALL                 Apply all above cheats\n"
+    ); // Olivers Cheat Hacks : The last bunch of command line options starting with "--cheat"
     return;
 }
 
@@ -101,6 +110,15 @@ int main(int argc, char *argv[])
     rogue.wizard = false;
     rogue.displayStealthRangeMode = false;
     rogue.trueColorMode = false;
+    // Begin Olivers Cheat Hacks
+    rogue.cheatHealth = false;
+    rogue.cheatNutrition = false;
+    rogue.cheatMagicMap = false;
+    rogue.cheatIdentify = false;
+    rogue.cheatConfusion = false;
+    rogue.cheatStuck = false;
+    rogue.cheatLight = false;
+    // End Olivers Cheat Hacks
 
     enum graphicsModes initialGraphics = TEXT_GRAPHICS;
 
@@ -111,6 +129,47 @@ int main(int argc, char *argv[])
             dumpScores();
             return 0;
         }
+
+        // Begin Olivers Cheat Hacks
+        if (strcmp(argv[i], "--cheatHealth") == 0) {
+            rogue.cheatHealth = true;
+            continue;
+        }
+        if (strcmp(argv[i], "--cheatNutrition") == 0) {
+            rogue.cheatNutrition = true;
+            continue;
+        }
+        if (strcmp(argv[i], "--cheatMagicMap") == 0) {
+            rogue.cheatMagicMap = true;
+            continue;
+        }
+        if (strcmp(argv[i], "--cheatIdentify") == 0) {
+            rogue.cheatIdentify = true;
+            continue;
+        }
+        if (strcmp(argv[i], "--cheatConfusion") == 0) {
+            rogue.cheatConfusion = true;
+            continue;
+        }
+        if (strcmp(argv[i], "--cheatStuck") == 0) {
+            rogue.cheatStuck = true;
+            continue;
+        }
+        if (strcmp(argv[i], "--cheatLight") == 0) {
+            rogue.cheatLight = true;
+            continue;
+        }
+        if (strcmp(argv[i], "--cheatALL") == 0) {
+            rogue.cheatHealth = true;
+            rogue.cheatNutrition = true;
+            rogue.cheatMagicMap = true;
+            rogue.cheatIdentify = true;
+            rogue.cheatConfusion = true;
+            rogue.cheatStuck = true;
+            rogue.cheatLight = true;
+            continue;
+        }
+        // End Olivers Cheat Hacks
 
         if (strcmp(argv[i], "--seed") == 0 || strcmp(argv[i], "-s") == 0) {
             // pick a seed!
@@ -175,7 +234,7 @@ int main(int argc, char *argv[])
                 continue;
             }
         }
-        
+
         if (strcmp(argv[i], "-vn") == 0) {
             if (i + 1 < argc) {
                 strncpy(rogue.nextGamePath, argv[i + 1], BROGUE_FILENAME_MAX);
