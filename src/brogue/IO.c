@@ -3455,7 +3455,11 @@ void message(const char *msg, unsigned long flags) {
 
     assureCosmeticRNG;
 
-    rogue.disturbed = true;
+    // Begin Olivers Cheat Hacks
+    if (!rogue.cheatDisturb) {
+        rogue.disturbed = true;
+    }
+    // End Olivers Cheat Hacks
     if (flags & REQUIRE_ACKNOWLEDGMENT || flags & REFRESH_SIDEBAR) {
         refreshSideBar(-1, -1, false);
     }

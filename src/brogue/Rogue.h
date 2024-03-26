@@ -2413,6 +2413,8 @@ typedef struct playerCharacter {
     boolean cheatConfusion;
     boolean cheatStuck;
     boolean cheatLight;
+    boolean cheatDisturb;
+    boolean cheatKeys;
     //End Olivers Cheat Hacks
 
     short depthLevel;                   // which dungeon level are we on

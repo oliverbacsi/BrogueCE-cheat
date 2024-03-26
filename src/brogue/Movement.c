@@ -29,6 +29,9 @@ void playerRuns(short direction) {
     boolean cardinalPassability[4];
 
     rogue.disturbed = (player.status[STATUS_CONFUSED] ? true : false);
+    // Begin Olivers Cheat Hacks
+    if (rogue.cheatDisturb) {rogue.disturbed = false;}
+    // End Olivers Cheat Hacks
 
     for (int dir = 0; dir < 4; dir++) {
         cardinalPassability[dir] = monsterAvoids(&player, posNeighborInDirection(player.loc, dir));
@@ -403,13 +406,22 @@ void useKeyAt(item *theItem, short x, short y) {
     }
 
     disposable = false;
-    for (i=0; i < KEY_ID_MAXIMUM && (theItem->keyLoc[i].loc.x || theItem->keyLoc[i].machine); i++) {
-        if (posEq(theItem->keyLoc[i].loc, (pos){ x, y }) && theItem->keyLoc[i].disposableHere) {
-            disposable = true;
-        } else if (theItem->keyLoc[i].machine == pmap[x][y].machineNumber && theItem->keyLoc[i].disposableHere) {
-            disposable = true;
+    // Begin Olivers Cheat Hacks
+    //   at this point we don't know if "theItem" is valid or not, so let's just assume
+    //   that we are not taking the item from anywhere and that's it.
+    //   this will also mean that valid key remains in the backpack. So what...?
+    if (!rogue.cheatKeys) {
+        // Begin Original Code
+        for (i=0; i < KEY_ID_MAXIMUM && (theItem->keyLoc[i].loc.x || theItem->keyLoc[i].machine); i++) {
+            if (posEq(theItem->keyLoc[i].loc, (pos){ x, y }) && theItem->keyLoc[i].disposableHere) {
+                disposable = true;
+            } else if (theItem->keyLoc[i].machine == pmap[x][y].machineNumber && theItem->keyLoc[i].disposableHere) {
+                disposable = true;
+            }
         }
+        // End Original Code
     }
+    // End Olivers Cheat Hacks
 
     if (disposable) {
         if (removeItemFromChain(theItem, packItems)) {
@@ -911,6 +923,10 @@ boolean playerMoves(short direction) {
 
     }
 
+    // Begin Olivers Cheat Hacks
+    //   Here the keyInPackFor() appears couple of times but only the validity is checked
+    //   and the returned item is not used so no point to invtervent
+    // End Olivers Cheat Hacks
     if (((!cellHasTerrainFlag(newX, newY, T_OBSTRUCTS_PASSABILITY) || (cellHasTMFlag(newX, newY, TM_PROMOTES_WITH_KEY) && keyInPackFor((pos){ newX, newY })))
          && !diagonalBlocked(x, y, newX, newY, false)
          && (!cellHasTerrainFlag(x, y, T_OBSTRUCTS_PASSABILITY) || (cellHasTMFlag(x, y, TM_PROMOTES_WITH_KEY) && keyInPackFor((pos){ x, y }))))
@@ -940,6 +956,12 @@ boolean playerMoves(short direction) {
                 sprintf(buf, "Free the captive %s?", monstName);
                 if (committed || confirm(buf, false)) {
                     committed = true;
+                    // Begin Olivers Cheat Hacks
+                    //   The keyInPackFor() is called two times, but in the first case
+                    //   only the validity is checked and the returned pointer is not used,
+                    //   in the second case the pointer is forwarded to useKeyAt()
+                    //   that handles the invalid pointer, so no point to intervent here
+                    // End Olivers Cheat Hacks
                     if (cellHasTMFlag(newX, newY, TM_PROMOTES_WITH_KEY) && keyInPackFor((pos){ newX, newY })) {
                         useKeyAt(keyInPackFor((pos){ newX, newY }), newX, newY);
                     }
@@ -1184,7 +1206,13 @@ boolean playerMoves(short direction) {
 
             if (pmapAt(player.loc)->flags & HAS_ITEM) {
                 pickUpItemAt(player.loc);
-                rogue.disturbed = true;
+                // Begin Olivers Cheat Hack
+                if (!rogue.cheatDisturb) {
+                    // Begin Original Code
+                    rogue.disturbed = true;
+                    // End Original Code
+                }
+                // End Olivers Cheat Hack
             }
             refreshDungeonCell(x, y);
             refreshDungeonCell(player.loc.x, player.loc.y);
@@ -2109,6 +2137,9 @@ boolean startFighting(enum directions dir, boolean tillDeath) {
 
 boolean isDisturbed(short x, short y) {
     pos p = (pos){ x, y };
+    // Begin Olivers Cheat Hacks
+    if (rogue.cheatDisturb) {return false;}
+    // End Olivers Cheat Hacks
     for (int i=0; i< DIRECTION_COUNT; i++) {
         const pos neighborPos = posNeighborInDirection(p, i);
         creature *const monst = monsterAtLoc(neighborPos);
@@ -2140,9 +2171,11 @@ void discover(short x, short y) {
         }
         refreshDungeonCell(x, y);
 
-        if (playerCanSee(x, y)) {
+        // Begin Olivers Cheat Hacks
+        if (playerCanSee(x, y) && !rogue.cheatDisturb) {
             rogue.disturbed = true;
         }
+        // End Olivers Cheat Hacks
     }
 }
 

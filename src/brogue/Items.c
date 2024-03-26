@@ -782,7 +782,11 @@ void pickUpItemAt(pos loc) {
     char buf[COLS * 3], buf2[COLS * 3];
     short guardianX, guardianY;
 
-    rogue.disturbed = true;
+    // Begin Olivers Cheat Hack
+    if (!rogue.cheatDisturb) {
+        rogue.disturbed = true;
+    }
+    // End Olivers Cheat Hack
 
     // find the item
     theItem = itemAtLoc(loc);
@@ -3245,6 +3249,9 @@ void equip(item *theItem) {
 // (2) its originDepth matches the depth, and
 // (3) either its key (x, y) location matches (x, y), or its machine number matches the machine number at (x, y).
 boolean keyMatchesLocation(item *theItem, pos loc) {
+    // Begin Olivers Cheat Hacks
+    if (rogue.cheatKeys) {return true;}
+    // End Olivers Cheat Hacks
     if ((theItem->flags & ITEM_IS_KEY)
         && theItem->originDepth == rogue.depthLevel) {
 
@@ -3262,6 +3269,11 @@ boolean keyMatchesLocation(item *theItem, pos loc) {
 item *keyInPackFor(pos loc) {
     item *theItem;
 
+    // Begin Olivers Cheat Hacks
+    if (rogue.cheatKeys) {return packItems->nextItem;}
+    //   Certainly this returns a big bullsh*t, but at least not NULL, so it is accepted,
+    //   And the "useKeyAt" needs to handle this issue that the pointer returned is crap.
+    // End Olivers Cheat Hacks
     for (theItem = packItems->nextItem; theItem != NULL; theItem = theItem->nextItem) {
         if (keyMatchesLocation(theItem, loc)) {
             return theItem;
@@ -3274,8 +3286,12 @@ item *keyOnTileAt(pos loc) {
     item *theItem;
     creature *monst;
 
+    // Begin Olivers Cheat Hacks
+    //   I guess here I don't need to intervent as the keyInPackFor() will return "true"
+    //   so no further cheats required to make this procedure also return "true" (meaning not NULL)
+    //   and whoever calls this procedure needs to handle that the returned pointer is crap.
+    // End Olivers Cheat Hacks
     if ((pmapAt(loc)->flags & HAS_PLAYER) && posEq(player.loc, loc) && keyInPackFor(loc)) {
-
         return keyInPackFor(loc);
     }
     if (pmapAt(loc)->flags & HAS_ITEM) {

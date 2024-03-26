@@ -547,6 +547,10 @@ void applyInstantTileEffectsToCreature(creature *monst) {
     }
 
     // keys
+    // Begin Olivers Cheat Hacks
+    //   The keyOnTileAt() is called but the returned item is immediately forwarded
+    //   to useKeyAt() , that is handling the invalid pointer, so all OK here.
+    // End Olivers Cheat Hacks
     if (cellHasTMFlag(*x, *y, TM_PROMOTES_WITH_KEY) && (theItem = keyOnTileAt((pos){ *x, *y }))) {
         useKeyAt(theItem, *x, *y);
     }
@@ -976,7 +980,11 @@ void flashCreatureAlert(creature *monst, char msg[200], const color *foreColor, 
         x = COLS - strLenWithoutEscapes(msg);
     }
     flashMessage(msg, x, y, (rogue.playbackMode ? 100 : 1000), foreColor, backColor);
-    rogue.disturbed = true;
+    // Begin Olivers Cheat Hacks
+    if (!rogue.cheatDisturb) {
+        rogue.disturbed = true;
+    }
+    // End Olivers Cheat Hacks
     rogue.autoPlayingLevel = false;
 }
 
@@ -2600,7 +2608,13 @@ void playerTurnEnded() {
             creature *monst = nextCreature(&it);
             if (canSeeMonster(monst) && !(monst->bookkeepingFlags & (MB_WAS_VISIBLE | MB_ALREADY_SEEN))) {
                 if (monst->creatureState != MONSTER_ALLY) {
-                    rogue.disturbed = true;
+                    // Begin Olivers Cheat Hacks
+                    if (!rogue.cheatDisturb) {
+                        // Begin Original Code
+                        rogue.disturbed = true;
+                        // End Original Code
+                    }
+                    // End Olivers Cheat Hacks
                     if (rogue.cautiousMode || rogue.automationActive) {
                         oldRNG = rogue.RNG;
                         rogue.RNG = RNG_COSMETIC;

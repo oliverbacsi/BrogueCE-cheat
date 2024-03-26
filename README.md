@@ -28,6 +28,13 @@ You can invoke the game with any of the following command-line arguments to get 
 	* Applies for net traps as well as for spider monster's web.
 * **`--cheatLight`**
 	* No darkening and no shrinking of visibility radius on deper levels.
+* **`--cheatKeys`**
+	* Pass all doors without the matching key.
+	* Theoretically this is useless as finding a key to a door on a certain level is easy but sometimes there is a reward room opening from an other reward room and the key for it is among the other rewards, so if You pick the key and open the second door and find out that You could have used a reward from the previous room better then there is no way back any more. This way You can preliminarily check the contents of a reward room.
+	* Unforeseen consequence : As in the reward rooms the artifacts belonging to their original place are also treated as "matching keys" by the program, but this cheat eliminates the need for matching keys, so as a result: If You pick up an artifact from a reward room, You can drop any valueless sh*t onto its place, the program will handle it as matching key, so all the other cages remain open in the reward room, so You can collect all artifacts eventually...
+* **`--cheatDisturb`**
+	* Don't get disturbed by a distant monster during running. (still to clarify for myself which events should disturb a running player)
+	* It is quite annoying that running gets stopped basically on everything. Certainly if You are playing fair without cheats, this is necessary. But if You ar invincible then it is quite annoying that Your running is interrupted just because there is a rat moving in the other corner of the level.
 * **`--cheatALL`**
 	* Switch on **all** above cheats. To keep You from typing too much.
 

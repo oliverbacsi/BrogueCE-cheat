@@ -56,6 +56,8 @@ static void printCommandlineHelp() {
     "--cheatConfusion           Confusion, Paralysis, or any negative effects avoided\n"
     "--cheatStuck               Do not get stuck in nets\n"
     "--cheatLight               No darking & shrinking of light radius on deep levels\n"
+    "--cheatDisturb             Don't get disturbed by minor things during running\n"
+    "--cheatKeys                Pass through all locked doors even not having keys\n"
     "--cheatALL                 Apply all above cheats\n"
     ); // Olivers Cheat Hacks : The last bunch of command line options starting with "--cheat"
     return;
@@ -118,6 +120,8 @@ int main(int argc, char *argv[])
     rogue.cheatConfusion = false;
     rogue.cheatStuck = false;
     rogue.cheatLight = false;
+    rogue.cheatDisturb = false;
+    rogue.cheatKeys = false;
     // End Olivers Cheat Hacks
 
     enum graphicsModes initialGraphics = TEXT_GRAPHICS;
@@ -159,6 +163,14 @@ int main(int argc, char *argv[])
             rogue.cheatLight = true;
             continue;
         }
+        if (strcmp(argv[i], "--cheatDisturb") == 0) {
+            rogue.cheatDisturb = true;
+            continue;
+        }
+        if (strcmp(argv[i], "--cheatKeys") == 0) {
+            rogue.cheatKeys = true;
+            continue;
+        }
         if (strcmp(argv[i], "--cheatALL") == 0) {
             rogue.cheatHealth = true;
             rogue.cheatNutrition = true;
@@ -167,6 +179,8 @@ int main(int argc, char *argv[])
             rogue.cheatConfusion = true;
             rogue.cheatStuck = true;
             rogue.cheatLight = true;
+            rogue.cheatDisturb = true;
+            rogue.cheatKeys = true;
             continue;
         }
         // End Olivers Cheat Hacks

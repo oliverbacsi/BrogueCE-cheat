@@ -166,7 +166,7 @@ void initializeRogue(uint64_t seed) {
     boolean playingback, playbackFF, playbackPaused, wizard, easy, displayStealthRangeMode;
     boolean trueColorMode;
     // Begin Olivers Cheat Hack
-    boolean cheatHealth, cheatNutrition, cheatMagicMap, cheatIdentify, cheatConfusion, cheatStuck, cheatLight;
+    boolean cheatHealth, cheatNutrition, cheatMagicMap, cheatIdentify, cheatConfusion, cheatStuck, cheatLight, cheatDisturb, cheatKeys;
     // End Olivers Cheat Hack
     short oldRNG;
     char currentGamePath[BROGUE_FILENAME_MAX];
@@ -186,6 +186,8 @@ void initializeRogue(uint64_t seed) {
     cheatConfusion = rogue.cheatConfusion;
     cheatStuck     = rogue.cheatStuck;
     cheatLight     = rogue.cheatLight;
+    cheatDisturb   = rogue.cheatDisturb;
+    cheatKeys      = rogue.cheatKeys;
     // End Olivers Cheat Hack
 
     strcpy(currentGamePath, rogue.currentGamePath);
@@ -210,6 +212,8 @@ void initializeRogue(uint64_t seed) {
     rogue.cheatConfusion = cheatConfusion;
     rogue.cheatStuck     = cheatStuck;
     rogue.cheatLight     = cheatLight;
+    rogue.cheatDisturb   = cheatDisturb;
+    rogue.cheatKeys      = cheatKeys;
     // End Olivers Cheat Hack
 
     rogue.gameHasEnded = false;
