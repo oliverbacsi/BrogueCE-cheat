@@ -5,7 +5,7 @@ Brogue CE
 
 > This is the Cheat Hacked version of the original Brogue CE game !!!
 
-For those lamers and n00bs for whom even the Wizard Mode is not good enough, or are fed up with starving or still getting affected by poisions or bolts or still dying of whatever, or simply don't need the full Wizard package just one thing of minor help for practicing purposes, here comes the cheated version of Brogue CE.  
+For those lamers and n00bs for whom even the Wizard Mode is not good enough, or are fed up with starving or still getting affected by poisions or bolts or still dying of whatever, or simply don't need the full Wizard package just one thing of minor help for practicing purposes, here comes the cheated version of Brogue CE.
 You can invoke the game with any of the following command-line arguments to get one thing or more things cheated at the same time:
 
 * **`--cheatHealth`**
@@ -35,10 +35,30 @@ You can invoke the game with any of the following command-line arguments to get 
 * **`--cheatDisturb`**
 	* Don't get disturbed by a distant monster during running. (still to clarify for myself which events should disturb a running player)
 	* It is quite annoying that running gets stopped basically on everything. Certainly if You are playing fair without cheats, this is necessary. But if You ar invincible then it is quite annoying that Your running is interrupted just because there is a rat moving in the other corner of the level.
+* **`--cheatWeakEels`**
+	* Eels are surprisingly powerful (HP 18, defense 27, accuracy 100, damage 3-7-2), knowing that they can appear at relatively low levels when the player is not yet developped and experienced too much.
+	* This cheat will make eels the same strong as rats (HP 6, defense 0, accuracy 80, damage 1-3-1)
 * **`--cheatALL`**
 	* Switch on **all** above cheats. To keep You from typing too much.
 
-Have fun playing!  
+
+# FURTHER CHEATS :
+
+* **`variants/GlobalsBrogue.c`**
+	* itemGenerationProbabilities (vector) : change item type probabilities when generating
+	* Vault room probabilities , contents, levels, etc
+	* extraItemsPerLevel = 0 : how many additional items to give per level
+* **`Items.c`**
+	* `item *makeItemInto()`
+		* rand_percent(40) : probability if item is non zero (either enchanted or coursed)
+		* rand_percent(50) : enchanted or coursed
+		* rand_percent(33) : good or bad runic
+		* Item->flags : ITEM_CURSED or ITEM_Blessed???????
+	* `void populateItems()`
+		* numberOfItems=3 : how many items on the level
+
+
+Have fun playing!
 And don't forget: if You are trained enough using the cheats, then try the game with no cheats as well!
 
 ---

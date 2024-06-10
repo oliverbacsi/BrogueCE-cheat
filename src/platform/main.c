@@ -58,6 +58,7 @@ static void printCommandlineHelp() {
     "--cheatLight               No darking & shrinking of light radius on deep levels\n"
     "--cheatDisturb             Don't get disturbed by minor things during running\n"
     "--cheatKeys                Pass through all locked doors even not having keys\n"
+    "--cheatWeakEels            Make the strong eels as weak as rats\n"
     "--cheatALL                 Apply all above cheats\n"
     ); // Olivers Cheat Hacks : The last bunch of command line options starting with "--cheat"
     return;
@@ -122,6 +123,7 @@ int main(int argc, char *argv[])
     rogue.cheatLight = false;
     rogue.cheatDisturb = false;
     rogue.cheatKeys = false;
+    rogue.cheatWeakEels = false;
     // End Olivers Cheat Hacks
 
     enum graphicsModes initialGraphics = TEXT_GRAPHICS;
@@ -171,6 +173,10 @@ int main(int argc, char *argv[])
             rogue.cheatKeys = true;
             continue;
         }
+        if (strcmp(argv[i], "--cheatWeakEels") == 0) {
+            rogue.cheatWeakEels = true;
+            continue;
+        }
         if (strcmp(argv[i], "--cheatALL") == 0) {
             rogue.cheatHealth = true;
             rogue.cheatNutrition = true;
@@ -180,6 +186,7 @@ int main(int argc, char *argv[])
             rogue.cheatStuck = true;
             rogue.cheatLight = true;
             rogue.cheatDisturb = true;
+            rogue.cheatWeakEels = true;
             rogue.cheatKeys = true;
             continue;
         }
